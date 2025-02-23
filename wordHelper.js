@@ -9,8 +9,11 @@ async function loadDictionary() {
         console.log('Attempting to load dictionary from dic/words.txt');
         const response = await fetch('dic/words.txt');
         const text = await response.text();
-        const words = text.split('\n').filter(word => word.trim().length > 0);
-        console.log('Dictionary contents:', words); // Debug log
+        // Split by newline and clean each word by trimming whitespace and \r
+        const words = text.split('\n')
+            .map(word => word.trim().replace(/\r$/, ''))
+            .filter(word => word.length > 0);
+        console.log('Dictionary contents after cleaning:', words); // Debug log
         return words;
     } catch (error) {
         console.error('Error loading dictionary:', error);
@@ -21,32 +24,44 @@ async function loadDictionary() {
 /**
  * @description Checks if a word can be formed using the given letters
  * @param {string} word - The word to check
- * @param {string} letters - The available letters
+ * @param {string} letters - The available letters (can include * as wildcard)
  * @returns {boolean} True if the word can be formed using the letters
  */
 function canFormWord(word, letters) {
-    const wordLower = word.toLowerCase().trim(); // Add trim()
+    const wordLower = word.toLowerCase().trim();
     const lettersLower = letters.toLowerCase();
-    console.log(`Checking if '${wordLower}' can be formed from '${lettersLower}'`); // Debug log
+    console.log(`Checking if '${wordLower}' can be formed from '${lettersLower}'`);
 
     const letterCount = {};
+    let wildcardCount = 0;
 
-    // Count available letters
+    // Count available letters and wildcards
     for (const letter of lettersLower) {
-        letterCount[letter] = (letterCount[letter] || 0) + 1;
+        if (letter === '*') {
+            wildcardCount++;
+        } else {
+            letterCount[letter] = (letterCount[letter] || 0) + 1;
+        }
     }
-    console.log('Letter counts:', letterCount); // Debug log
+    console.log('Letter counts:', letterCount, 'Wildcards:', wildcardCount);
 
     // Check if word can be formed
     for (const letter of wordLower) {
         if (!letterCount[letter]) {
-            console.log(`Failed at letter '${letter}' - not enough count`); // Debug log
-            return false;
+            // If no letter available, try using a wildcard
+            if (wildcardCount > 0) {
+                wildcardCount--;
+                console.log(`Using wildcard for letter '${letter}'`);
+            } else {
+                console.log(`Failed at letter '${letter}' - not enough count`);
+                return false;
+            }
+        } else {
+            letterCount[letter]--;
         }
-        letterCount[letter]--;
     }
 
-    console.log('Word can be formed!'); // Debug log
+    console.log('Word can be formed!');
     return true;
 }
 
@@ -97,10 +112,17 @@ document.addEventListener('DOMContentLoaded', () => {
             console.log('Button clicked');
             const letters = input.value.trim();
 
-            // Improved input validation
+            // Improved input validation with wildcard warning
             if (!letters) {
                 console.warn('No letters provided');
                 alert('Please enter some letters');
+                return;
+            }
+
+            const wildcardCount = (letters.match(/\*/g) || []).length;
+            if (wildcardCount > 3) {
+                console.warn('Too many wildcards');
+                alert('Maximum 3 wildcards (*) allowed');
                 return;
             }
 
