@@ -7,7 +7,7 @@
 async function loadDictionary() {
     try {
         console.log('Attempting to load dictionary from dic/words.txt');
-        const response = await fetch('dic/words.txt');
+        const response = await fetch('./dic/words.txt');
         const text = await response.text();
         // Split by newline and clean each word by trimming whitespace and \r
         const words = text.split('\n')
