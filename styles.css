@@ -28,9 +28,25 @@ body {
 .input-section {
     margin-bottom: 20px;
     display: flex;
+    flex-direction: column;
+    gap: 15px;
+}
+
+.input-row {
+    display: flex;
     flex-wrap: wrap;
-    gap: 10px;
     align-items: center;
+    gap: 10px;
+}
+
+.input-row label {
+    min-width: 200px;
+}
+
+.input-row input[type="text"] {
+    flex: 1;
+    min-width: 200px;
+    max-width: 400px;
 }
 
 .input-section label {
@@ -58,6 +74,7 @@ input[type="text"] {
 }
 
 button {
+    align-self: flex-start;
     padding: 8px 16px;
     background-color: var(--secondary-color);
     color: white;
