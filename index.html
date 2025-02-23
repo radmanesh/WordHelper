@@ -1,0 +1,26 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Word Helper - Find words using available letters">
+    <title>Word Helper</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <main class="container">
+        <h1>Word Helper</h1>
+        <div class="input-section">
+            <label for="letters">Enter your letters:</label>
+            <input type="text" id="letters" placeholder="e.g., eramtix">
+            <button id="findWords">Find Words</button>
+        </div>
+        <div class="results-section">
+            <h2>Possible Words:</h2>
+            <div id="wordList"></div>
+        </div>
+    </main>
+    <script src="wordHelper.js" defer></script>
+    <script src="tests/wordHelper.test.js" defer></script>
+</body>
+</html>
