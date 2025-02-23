@@ -27,6 +27,14 @@ body {
 /* Components */
 .input-section {
     margin-bottom: 20px;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+    align-items: center;
+}
+
+.input-section label {
+    margin-right: 5px;
 }
 
 input[type="text"] {
@@ -34,6 +42,19 @@ input[type="text"] {
     font-size: 16px;
     width: 200px;
     margin-right: 10px;
+}
+
+/* Pattern input specific styles */
+#pattern {
+    width: 150px;
+    border-color: var(--secondary-color);
+    font-family: monospace;
+}
+
+.pattern-error {
+    color: #e74c3c;
+    font-size: 0.9em;
+    width: 100%;
 }
 
 button {

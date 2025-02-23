@@ -66,20 +66,36 @@ function canFormWord(word, letters) {
 }
 
 /**
- * @description Finds all possible words that can be formed with the given letters
+ * @description Finds all possible words that can be formed with given letters and pattern
  * @param {string[]} dictionary - Array of available words
  * @param {string} letters - The available letters
- * @returns {string[]} Array of words that can be formed
+ * @param {string} pattern - Optional regex pattern to filter results
+ * @returns {string[]} Array of matching words
  */
-function findPossibleWords(dictionary, letters) {
-    console.log(`Searching dictionary of ${dictionary.length} words`); // Debug log
-    console.log('Dictionary contents:', dictionary); // Debug log
-    return dictionary.filter(word => canFormWord(word, letters));
+function findPossibleWords(dictionary, letters, pattern = '') {
+    console.log(`Searching dictionary with letters: ${letters}, pattern: ${pattern}`);
+
+    let results = dictionary.filter(word => canFormWord(word, letters));
+
+    // Apply regex pattern if provided
+    if (pattern) {
+        try {
+            const regex = new RegExp(pattern);
+            results = results.filter(word => regex.test(word));
+            console.log(`Filtered ${results.length} words matching pattern`);
+        } catch (error) {
+            console.error('Invalid regex pattern:', error);
+            throw new Error('Invalid regex pattern');
+        }
+    }
+
+    return results;
 }
 
 // Initialize the application
 document.addEventListener('DOMContentLoaded', () => {
     const input = document.getElementById('letters');
+    const patternInput = document.getElementById('pattern');
     const button = document.getElementById('findWords');
     const wordList = document.getElementById('wordList');
     let dictionary = [];
@@ -106,13 +122,17 @@ document.addEventListener('DOMContentLoaded', () => {
             setLoading(false);
         });
 
-    // Handle button click
-    button.addEventListener('click', () => {
+    /**
+     * @description Performs the word search with current input values
+     * @returns {void}
+     */
+    const performSearch = () => {
         try {
-            console.log('Button clicked');
+            console.log('Performing search');
             const letters = input.value.trim();
+            const pattern = patternInput.value.trim();
 
-            // Improved input validation with wildcard warning
+            // Input validation checks...
             if (!letters) {
                 console.warn('No letters provided');
                 alert('Please enter some letters');
@@ -126,14 +146,25 @@ document.addEventListener('DOMContentLoaded', () => {
                 return;
             }
 
+            // Validate regex pattern if provided
+            if (pattern) {
+                try {
+                    new RegExp(pattern);
+                } catch (error) {
+                    console.error('Invalid regex pattern:', error);
+                    alert('Invalid regex pattern');
+                    return;
+                }
+            }
+
             if (dictionary.length === 0) {
                 console.error('Dictionary not loaded');
                 alert('Dictionary not loaded yet, please try again');
                 return;
             }
 
-            console.log(`Finding words using letters: ${letters}`);
-            const possibleWords = findPossibleWords(dictionary, letters);
+            console.log(`Finding words using letters: ${letters}, pattern: ${pattern}`);
+            const possibleWords = findPossibleWords(dictionary, letters, pattern);
             console.log(`Found ${possibleWords.length} possible words`);
 
             // Display results
@@ -146,7 +177,34 @@ document.addEventListener('DOMContentLoaded', () => {
             }
         } catch (error) {
             console.error('Error processing request:', error);
-            wordList.innerHTML = '<div class="error">An error occurred</div>';
+            wordList.innerHTML = `<div class="error">
+                ${error.message || 'An error occurred'}
+            </div>`;
+        }
+    };
+
+    // Add Enter key handlers
+    input.addEventListener('keypress', (event) => {
+        if (event.key === 'Enter') {
+            event.preventDefault();
+            performSearch();
         }
     });
+
+    patternInput.addEventListener('keypress', (event) => {
+        if (event.key === 'Enter') {
+            event.preventDefault();
+            performSearch();
+        }
+    });
+
+    // Update button click handler to use shared function
+    button.addEventListener('click', performSearch);
+
+    // Cleanup
+    return () => {
+        button.removeEventListener('click', performSearch);
+        input.removeEventListener('keypress');
+        patternInput.removeEventListener('keypress');
+    };
 });
