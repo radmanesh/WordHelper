@@ -98,12 +98,15 @@ document.addEventListener('DOMContentLoaded', () => {
     const patternInput = document.getElementById('pattern');
     const button = document.getElementById('findWords');
     const wordList = document.getElementById('wordList');
+    const loadingStatus = document.getElementById('loadingStatus');
     let dictionary = [];
 
-    // Add loading indicator
-    const setLoading = (isLoading) => {
+    // Update loading indicator
+    const setLoading = (isLoading, message = 'Loading dictionary...') => {
         button.disabled = isLoading;
         button.textContent = isLoading ? 'Loading...' : 'Find Words';
+        loadingStatus.textContent = message;
+        loadingStatus.classList.toggle('active', isLoading);
     };
 
     // Load dictionary when page loads
@@ -119,7 +122,7 @@ document.addEventListener('DOMContentLoaded', () => {
         .catch(error => {
             console.error('Failed to load dictionary:', error);
             wordList.innerHTML = '<div class="error">Failed to load dictionary</div>';
-            setLoading(false);
+            setLoading(false, 'Failed to load dictionary');
         });
 
     /**
@@ -128,12 +131,14 @@ document.addEventListener('DOMContentLoaded', () => {
      */
     const performSearch = () => {
         try {
-            console.log('Performing search');
+            // Set loading state before any operations
+            setLoading(true, 'Searching words...');
             const letters = input.value.trim();
             const pattern = patternInput.value.trim();
 
-            // Input validation checks...
+            // Input validation checks with immediate loading state clear
             if (!letters) {
+                setLoading(false);
                 console.warn('No letters provided');
                 alert('Please enter some letters');
                 return;
@@ -141,8 +146,16 @@ document.addEventListener('DOMContentLoaded', () => {
 
             const wildcardCount = (letters.match(/\*/g) || []).length;
             if (wildcardCount > 3) {
+                setLoading(false);
                 console.warn('Too many wildcards');
                 alert('Maximum 3 wildcards (*) allowed');
+                return;
+            }
+
+            if (dictionary.length === 0) {
+                setLoading(false);
+                console.error('Dictionary not loaded');
+                alert('Dictionary not loaded yet, please try again');
                 return;
             }
 
@@ -151,23 +164,19 @@ document.addEventListener('DOMContentLoaded', () => {
                 try {
                     new RegExp(pattern);
                 } catch (error) {
+                    setLoading(false);
                     console.error('Invalid regex pattern:', error);
                     alert('Invalid regex pattern');
                     return;
                 }
             }
 
-            if (dictionary.length === 0) {
-                console.error('Dictionary not loaded');
-                alert('Dictionary not loaded yet, please try again');
-                return;
-            }
-
+            // Perform the search
             console.log(`Finding words using letters: ${letters}, pattern: ${pattern}`);
             const possibleWords = findPossibleWords(dictionary, letters, pattern);
             console.log(`Found ${possibleWords.length} possible words`);
 
-            // Display results
+            // Update UI with results
             if (possibleWords.length === 0) {
                 wordList.innerHTML = '<div class="no-results">No words found</div>';
             } else {
@@ -175,11 +184,17 @@ document.addEventListener('DOMContentLoaded', () => {
                     .map(word => `<div class="word">${word}</div>`)
                     .join('');
             }
+
+            // Clear loading state after everything is done
+            setLoading(false);
+
         } catch (error) {
+            // Handle errors and clear loading state
             console.error('Error processing request:', error);
             wordList.innerHTML = `<div class="error">
                 ${error.message || 'An error occurred'}
             </div>`;
+            setLoading(false, 'Search failed');
         }
     };
 

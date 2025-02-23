@@ -83,6 +83,28 @@ button {
     cursor: pointer;
 }
 
+/* Loading indicator styles */
+.loading-status {
+    background-color: #f8f9fa;
+    border-radius: 4px;
+    padding: 8px 12px;
+    margin-bottom: 15px;
+    color: var(--secondary-color);
+    font-size: 0.9em;
+    display: none;
+}
+
+.loading-status.active {
+    display: block;
+    animation: pulse 1.5s infinite;
+}
+
+@keyframes pulse {
+    0% { opacity: 0.6; }
+    50% { opacity: 1; }
+    100% { opacity: 0.6; }
+}
+
 /* Results section */
 .results-section {
     margin-top: 20px;
